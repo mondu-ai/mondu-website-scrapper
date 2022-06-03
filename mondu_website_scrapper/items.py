@@ -4,9 +4,9 @@
 import scrapy
 
 
-class MonduWebsiteScrapperItem(scrapy.Item):
+class GeneralInformationItem(scrapy.Item):
     """
-    define scrapy items for our spider
+    define scrapy general information items for our spider
     """
 
     company_url = scrapy.Field()
@@ -16,18 +16,15 @@ class MonduWebsiteScrapperItem(scrapy.Item):
     payments = scrapy.Field()
     webshop_urls = scrapy.Field()
     webshop_system = scrapy.Field()
-    products_quantity = scrapy.Field()
-    products_avg_price = scrapy.Field()
     wappalyzer = scrapy.Field()
 
 
-# class MonduItemLoader(ItemLoader):
-#     """_summary_
+class PriceItem(scrapy.Item):
+    """
+    define scrapy price items for our spider
+    """
 
-#     Args:
-#         ItemLoader (_type_): _description_
-#     """
-
-#     wappalyzer_in = scrapy.Field(
-#         input_processor=MapCompose(extract_categories_from_wappalyzer), serializer=dict
-#     )
+    company_url = scrapy.Field()
+    products_quantity = scrapy.Field()
+    products_avg_price = scrapy.Field()
+    currency = scrapy.Field()
