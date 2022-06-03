@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Union
 import pathlib
 import pandas as pd
 import scrapy
+
 from scrapy.crawler import CrawlerProcess
 from scrapy.linkextractors import LinkExtractor
 from scrapy.utils.project import get_project_settings
@@ -25,12 +26,18 @@ class LeadSpider(scrapy.Spider):
     Yields: yeild an item and item pipeline will export it as a csv file
     """
 
-    name = "findingnemo2"
+    name = "findingnemo"
 
     custom_settings = {
         "USER_AGENT": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
     }
     start_urls = [
+        "https://shop.headon.at/",
+        "https://pewag.com",
+        "https://b2b.fischersports.com/en-us/profile/login",
+        "https://www.die-verpackungs-druckerei.de/",
+        "https://www.microsoft.com/de-at",
+        "https://www.giesswein.com/",
         "https://b2b.vitrasan.com/",
         "https://zpnevolution.com/",
         "https://www.mysortimo.at/de_AT/",
@@ -109,16 +116,13 @@ class LeadSpider(scrapy.Spider):
 
         payments_keywords = self.settings["PAYMENTS_KEYWORDS"]
 
-        res_alt = [
+        res_payment = [
             word.lower() for word in response.xpath("//img/@alt").getall() if word
-        ]
-        res_src = [
-            word.lower() for word in response.xpath("//img/@src").getall() if word
-        ]
+        ] + [word.lower() for word in response.xpath("//img/@src").getall() if word]
         return list(
             set(
                 pay
-                for scrapped_src in res_alt + res_src
+                for scrapped_src in res_payment
                 for pay in payments_keywords
                 if pay in scrapped_src
             )
@@ -216,10 +220,11 @@ class LeadSpider(scrapy.Spider):
         currency = re.search(currency_sign, data).group()
         price_lst = re.findall(price_pattern, data)
         price_lst = [float(p.strip().replace(",", ".")) for p in price_lst]
-
         yield PriceItem(
             **{
-                "products_avg_price": round(sum(price_lst) / len(price_lst), 2),
+                "products_avg_price": round(sum(price_lst) / len(price_lst), 2)
+                if price_lst
+                else None,
                 "products_quantity": len(price_lst),
                 "currency": currency,
                 "company_url": company_url,
@@ -228,7 +233,6 @@ class LeadSpider(scrapy.Spider):
 
 
 def create_report_dataset(
-    read_file_path: Union[str, pathlib.Path] = None,
     wappalyzer_data_column: str = "wappalyzer",
 ):
     """
@@ -239,18 +243,41 @@ def create_report_dataset(
 
     Returns: None
     """
-    if read_file_path is None:
-        read_file_path = settings["FILE_FOLDE"] / "generalinformationitem.csv"
+    general_info_path = settings["FILE_FOLDE"] / "generalinformationitem.csv"
+    price_info_path = settings["FILE_FOLDE"] / "priceitem.csv"
+
+    general_info_df = pd.read_csv(general_info_path)
+    logging.info(
+        "scraped general information dataframe is of %s", general_info_df.shape
+    )
+
+    price_df = pd.read_csv(price_info_path)
+    logging.info("scraped price information dataframe is of %s", price_df.shape)
+
+    price_df = (
+        price_df.groupby("company_url")
+        .agg(
+            {
+                "products_avg_price": "mean",
+                "currency": "first",
+                "products_quantity": "sum",
+            }
+        )
+        .rename(columns={"products_quantity": "total_num_products"})
+    )
+
+    wappalyzer_df = normalize_wappalyzer_data(general_info_df[wappalyzer_data_column])
+    general_info_df.drop(wappalyzer_data_column, inplace=True, axis=1)
+    update_df = pd.concat([general_info_df, wappalyzer_df], axis=1).set_index(
+        "company_url"
+    )
+
+    report_df = update_df.join(price_df, on="company_url")
+
     save_file_path = settings["FILE_FOLDE"] / f"{LeadSpider.name}__report.csv"
 
-    scraped_df = pd.read_csv(read_file_path)
-    logging.info("scraped dataframe is of %s", scraped_df.shape)
-
-    wappalyzer_df = normalize_wappalyzer_data(scraped_df[wappalyzer_data_column])
-    scraped_df.drop(wappalyzer_data_column, inplace=True, axis=1)
-    update_df = pd.concat([scraped_df, wappalyzer_df], axis=1)
-    update_df.to_csv(save_file_path, index=False)
-    logging.info("final report dataframe is of %s", update_df.shape)
+    report_df.to_csv(save_file_path)
+    logging.info("final report dataframe is of %s", report_df.shape)
     logging.info("final report csv is saved under %s", save_file_path)
 
 
