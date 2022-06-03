@@ -115,7 +115,6 @@ PAYMENTS_KEYWORDS = [
     "sofort",
     "apple",
     "amazon",
-    "shopify",
     "afterpay",
 ]
 
@@ -157,3 +156,9 @@ WEBSYSTEMS_KEYWORDS = [
     "SAP Commerce Cloud",
     "plentymarkets",
 ]
+
+
+CURRENCY_SIGN = "$|EUR|€|GBP|£"
+PRICE_PATTERN = (
+    r"\d*[\.\,]?\d+(?=\s?[$|EUR|€|GBP|£])|(?<=[$|EUR|€|GBP|£])\s?\d*[\.\,]?\d+"
+)
