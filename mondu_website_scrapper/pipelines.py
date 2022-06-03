@@ -3,9 +3,8 @@
 # pylint: disable=attribute-defined-outside-init
 import logging
 from scrapy.exporters import CsvItemExporter
-from mondu_website_scrapper.utils import extract_categories_from_wappalyzer
-
 from mondu_website_scrapper import items
+from mondu_website_scrapper.utils import extract_categories_from_wappalyzer
 
 
 def item_type(item):
