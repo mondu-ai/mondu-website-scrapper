@@ -2,7 +2,6 @@
 
 
 import scrapy
-from itemloaders.processors import Join
 
 
 class GeneralInformationItem(scrapy.Item):
@@ -13,7 +12,7 @@ class GeneralInformationItem(scrapy.Item):
     company_url = scrapy.Field()
     languages = scrapy.Field()
     tagged_as_b2b = scrapy.Field()
-    tagged_by_b2b_words = scrapy.Field(output_processor=Join(", "))
+    tagged_by_b2b_words = scrapy.Field()
     payments = scrapy.Field()
     webshop_urls = scrapy.Field()
     webshop_system = scrapy.Field()

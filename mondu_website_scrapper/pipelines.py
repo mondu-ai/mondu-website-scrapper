@@ -2,7 +2,9 @@
 
 # pylint: disable=attribute-defined-outside-init
 import logging
+
 from scrapy.exporters import CsvItemExporter
+
 from mondu_website_scrapper import items
 from mondu_website_scrapper.utils import extract_categories_from_wappalyzer
 
@@ -42,15 +44,15 @@ class MonduWebsiteScrapperPipeline:
         """
         open file, define exporter and start exporting
         """
-        self.files = dict(
-            [
-                (name, open(self.file_folder / f"{name}.csv", "w+b"))
-                for name in self.defined_items
-            ]
-        )
-        self.exporters = dict(
-            [(name, CsvItemExporter(self.files[name])) for name in self.defined_items]
-        )
+        self.files = {
+            name: open(self.file_folder / f"{name}.csv", "w+b")
+            for name in self.defined_items
+        }
+
+        self.exporters = {
+            name: CsvItemExporter(self.files[name]) for name in self.defined_items
+        }
+
         logging.info("Starting exporting into csv...")
 
         for exporter in self.exporters.values():
