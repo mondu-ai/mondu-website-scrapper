@@ -1,7 +1,7 @@
 """ Define util functions here"""
 import re
 import string
-from typing import List, Dict
+from typing import Dict, List
 
 
 def get_normalized_words(words: List) -> List:
@@ -66,4 +66,5 @@ def extract_categories_from_wappalyzer(wappalyzed_categories: Dict) -> Dict:
                 categories_dict.update({i: [key] for i in value["categories"]})
             else:
                 categories_dict[i].append(key)
-    return {key: list(set(value)) for key, value in categories_dict.items()}
+    refactor_d = {key: list(set(value)) for key, value in categories_dict.items()}
+    return {key: ", ".join(value) for key, value in refactor_d.items()}
