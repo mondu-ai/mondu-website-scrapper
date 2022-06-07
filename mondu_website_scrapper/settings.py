@@ -101,7 +101,7 @@ START_URLS = [
     "https://b2b.akku-maeser.at/",
 ]
 # file folder for scraped results
-FILE_FOLDE = Path(__file__).parent / "scraped_results"
+FILE_FOLDER = Path(__file__).parent / "scraped_results"
 
 # webshop searching keywords
 WEBSHOP_KEYWORDS = [

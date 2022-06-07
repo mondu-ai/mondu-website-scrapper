@@ -3,7 +3,7 @@ import ast
 import logging
 import re
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 import pandas as pd
 import scrapy
@@ -25,8 +25,8 @@ class LeadSpider(scrapy.Spider):
     """
     our first spider for crawling web pages.
 
+    Returns: the direct returns are items that in python dictionary format. It will be later passed to pipelines.
 
-    Returns: return a csv file
     Yields: yeild an item and item pipeline will export it as a csv file
     """
 
@@ -69,7 +69,7 @@ class LeadSpider(scrapy.Spider):
             )
         yield item
 
-    def extract_webshop_url(self, response) -> List:
+    def extract_webshop_url(self, response) -> list:
         """
         extract links that contains keywords related to webshop
 
@@ -103,7 +103,7 @@ class LeadSpider(scrapy.Spider):
             return [link.url for link in webshop_links]
         return []
 
-    def extract_payments(self, response: scrapy.http.response) -> List:
+    def extract_payments(self, response: scrapy.http.response) -> list:
         """
         extract payments by looking up pre-defined payments keyword
 
@@ -124,7 +124,7 @@ class LeadSpider(scrapy.Spider):
             )
         )
 
-    def extract_b2b_keywords(self, response: scrapy.http.response) -> List:
+    def extract_b2b_keywords(self, response: scrapy.http.response) -> list:
         """
         extract bb2 keywords pre-defined under settings.py from html body
 
@@ -151,7 +151,7 @@ class LeadSpider(scrapy.Spider):
 
         return [k for k, v in b2b_key_dict.items() if v]
 
-    def extract_webshop_system(self, response: scrapy.http.response) -> List:
+    def extract_webshop_system(self, response: scrapy.http.response) -> list:
         """
         extract webshop keywords pre-defined under settings.py from html body
 
@@ -193,7 +193,7 @@ class LeadSpider(scrapy.Spider):
         webpage = WebPage.new_from_url(response.url)
         return wappalyzer.analyze_with_categories(webpage)
 
-    def extract_price_info(self, response: scrapy.http.response, company_url) -> Dict:
+    def extract_price_info(self, response: scrapy.http.response, company_url) -> dict:
         """
         extract price information by matching any numeric up to 10 digits before and after
         decimal indicator comma or dot for currency € and $
@@ -242,7 +242,7 @@ def _create_report_dataset(
     file_names = [name.lower() for name, _ in items.__dict__.items() if "Item" in name]
 
     dfs = {
-        file_name: pd.read_csv(settings["FILE_FOLDE"] / f"{file_name}.csv")
+        file_name: pd.read_csv(settings["FILE_FOLDER"] / f"{file_name}.csv")
         for file_name in file_names
     }
 
