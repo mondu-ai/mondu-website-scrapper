@@ -91,8 +91,19 @@ ITEM_PIPELINES = {
 
 # Argument Set Up
 
+# start urls input
+START_URLS = [
+    "https://www.szabo-scandic.com/",
+    "https://b2b.vitrasan.com/",
+    "https://www.hilti.at/",
+    "https://shop.bibus.at/customer/account/create/",
+    "https://b2b.accushop.at/",
+    "https://b2b.akku-maeser.at/",
+]
+# file folder for scraped results
 FILE_FOLDE = Path(__file__).parent / "scraped_results"
 
+# webshop searching keywords
 WEBSHOP_KEYWORDS = [
     "warenkorb",
     "einkaufswagen",
@@ -106,6 +117,7 @@ WEBSHOP_KEYWORDS = [
     "payment methods",
 ]
 
+# payment methods searching keywords
 PAYMENTS_KEYWORDS = [
     "mastercard",
     "visa",
@@ -118,6 +130,7 @@ PAYMENTS_KEYWORDS = [
     "afterpay",
 ]
 
+# b2b searching keywords
 B2B_KEYWORDS = [
     "großkunde",
     "geschäftskunde",
@@ -137,6 +150,7 @@ B2B_KEYWORDS = [
     "institutions",
 ]
 
+# websystem searching keywords
 WEBSYSTEMS_KEYWORDS = [
     "Magento",
     "Magento 1",
@@ -157,8 +171,10 @@ WEBSYSTEMS_KEYWORDS = [
     "plentymarkets",
 ]
 
-
+# currency sign
 CURRENCY_SIGN = "$|EUR|€|GBP|£"
+
+# price searching pattern
 PRICE_PATTERN = (
     r"\d*[\.\,]?\d+(?=\s?[$|EUR|€|GBP|£])|(?<=[$|EUR|€|GBP|£])\s?\d*[\.\,]?\d+"
 )

@@ -2,18 +2,22 @@
 import ast
 import logging
 import re
-from typing import Any, Dict, List, Union
-import pathlib
+import time
+from typing import Any, Dict, List
+
 import pandas as pd
 import scrapy
-
 from scrapy.crawler import CrawlerProcess
 from scrapy.linkextractors import LinkExtractor
 from scrapy.utils.project import get_project_settings
 from Wappalyzer import Wappalyzer, WebPage
+
+from mondu_website_scrapper import items
 from mondu_website_scrapper.items import GeneralInformationItem, PriceItem
 
 wappalyzer = Wappalyzer.latest()
+settings = get_project_settings()
+
 # pylint: disable=R0201
 
 
@@ -31,17 +35,9 @@ class LeadSpider(scrapy.Spider):
     custom_settings = {
         "USER_AGENT": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
     }
-    start_urls = [
-        "https://shop.headon.at/",
-        "https://pewag.com",
-        "https://b2b.fischersports.com/en-us/profile/login",
-        "https://www.die-verpackungs-druckerei.de/",
-        "https://www.microsoft.com/de-at",
-        "https://www.giesswein.com/",
-        "https://b2b.vitrasan.com/",
-        "https://zpnevolution.com/",
-        "https://www.mysortimo.at/de_AT/",
-    ]
+
+    start_urls = settings["START_URLS"]
+    print("start_urls", start_urls)
 
     def parse(self, response):  # pylint: disable=arguments-differ
         """
@@ -215,7 +211,7 @@ class LeadSpider(scrapy.Spider):
         price_pattern = self.settings["PRICE_PATTERN"]
 
         if not re.search(currency_sign, data).group():
-            return None
+            yield None
 
         currency = re.search(currency_sign, data).group()
         price_lst = re.findall(price_pattern, data)
@@ -232,7 +228,7 @@ class LeadSpider(scrapy.Spider):
         )
 
 
-def create_report_dataset(
+def _create_report_dataset(
     wappalyzer_data_column: str = "wappalyzer",
 ):
     """
@@ -243,42 +239,49 @@ def create_report_dataset(
 
     Returns: None
     """
-    general_info_path = settings["FILE_FOLDE"] / "generalinformationitem.csv"
-    price_info_path = settings["FILE_FOLDE"] / "priceitem.csv"
+    file_names = [name.lower() for name, _ in items.__dict__.items() if "Item" in name]
 
-    general_info_df = pd.read_csv(general_info_path)
-    logging.info(
-        "scraped general information dataframe is of %s", general_info_df.shape
-    )
+    dfs = {
+        file_name: pd.read_csv(settings["FILE_FOLDE"] / f"{file_name}.csv")
+        for file_name in file_names
+    }
 
-    price_df = pd.read_csv(price_info_path)
-    logging.info("scraped price information dataframe is of %s", price_df.shape)
+    eng_dfs = {}
+    for file_name, scraped_df in dfs.items():
+        logging.info("scraped %s dataframe is of %s", file_name, scraped_df.shape)
+        if "general" in file_name:
+            eng_dfs["wappalyzed_df"] = normalize_wappalyzer_data(
+                scraped_df[wappalyzer_data_column]
+            )
+            scraped_df.drop(wappalyzer_data_column, inplace=True, axis=1)
+            eng_dfs["general_df"] = scraped_df
 
-    price_df = (
-        price_df.groupby("company_url")
-        .agg(
-            {
-                "products_avg_price": "mean",
-                "currency": "first",
-                "products_quantity": "sum",
-            }
-        )
-        .rename(columns={"products_quantity": "total_num_products"})
-    )
+        else:
+            eng_dfs["price_df"] = (
+                scraped_df.groupby("company_url")
+                .agg(
+                    {
+                        "products_avg_price": "mean",
+                        "currency": "first",
+                        "products_quantity": "sum",
+                    }
+                )
+                .rename(columns={"products_quantity": "total_num_products"})
+            )
 
-    wappalyzer_df = normalize_wappalyzer_data(general_info_df[wappalyzer_data_column])
-    general_info_df.drop(wappalyzer_data_column, inplace=True, axis=1)
-    update_df = pd.concat([general_info_df, wappalyzer_df], axis=1).set_index(
+    report_df = eng_dfs["general_df"].join(eng_dfs["price_df"], on="company_url")
+    report_df = pd.concat([report_df, eng_dfs["wappalyzed_df"]], axis=1).set_index(
         "company_url"
     )
-
-    report_df = update_df.join(price_df, on="company_url")
 
     save_file_path = settings["FILE_FOLDE"] / f"{LeadSpider.name}__report.csv"
 
     report_df.to_csv(save_file_path)
-    logging.info("final report dataframe is of %s", report_df.shape)
-    logging.info("final report csv is saved under %s", save_file_path)
+    logging.info(
+        "final report dataframe is of %s, saved under %s",
+        report_df.shape,
+        save_file_path,
+    )
 
 
 def normalize_wappalyzer_data(wappalyzer_data: pd.Series) -> pd.DataFrame:
@@ -295,9 +298,33 @@ def normalize_wappalyzer_data(wappalyzer_data: pd.Series) -> pd.DataFrame:
     return pd.json_normalize(wappalyzer_data.apply(ast.literal_eval).tolist())
 
 
+def main(use_cache: bool = True):
+    """_summary_
+
+    Args:
+        cache (bool, optional): _description_. Defaults to True.
+    """
+    if not use_cache:
+        process = CrawlerProcess(settings)
+        process.crawl(LeadSpider)
+        start_time = time.time()
+        process.start()
+        logging.info("--- %s seconds ---", (time.time() - start_time))
+    _create_report_dataset()
+
+
 if __name__ == "__main__":
-    settings = get_project_settings()
-    process = CrawlerProcess(settings)
-    process.crawl(LeadSpider)
-    process.start()
-    create_report_dataset()
+    import argparse
+
+    # Initiate the parser
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--use-cache",
+        type=bool,
+        help="decide if use cached data",
+        action=argparse.BooleanOptionalAction,
+    )
+
+    # Read arguments from the command line
+    args = parser.parse_args()
+    main(args.use_cache)
