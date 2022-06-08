@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Union
 
 
-def get_normalized_words(words: list) -> list:
+def get_normalized_words(words: list[str]) -> list[str]:
     """
     normalize words by
     1. remove punctuation
@@ -24,7 +24,7 @@ def get_normalized_words(words: list) -> list:
 
 def get_normalized_price(
     data: str, allow_currency: list = None, allow_length: int = 10
-) -> list:
+) -> list[Union[int, float]]:
     """
     extract digits near the currency sign.
     This help functions aims to find all digits between 1 and 10 digits before and after

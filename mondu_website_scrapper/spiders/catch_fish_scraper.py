@@ -3,7 +3,7 @@ import ast
 import logging
 import re
 import time
-from typing import Any
+from typing import Any, Optional
 
 import pandas as pd
 import scrapy
@@ -13,10 +13,10 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.utils.project import get_project_settings
 from Wappalyzer import Wappalyzer, WebPage
 
-from mondu_website_scrapper import items
-from mondu_website_scrapper.gsheet_api.read_from_gsheet import read_from_gsheet
-from mondu_website_scrapper.items import GeneralInformationItem, PriceItem
-from mondu_website_scrapper.utils import is_empty_file
+from .. import items
+from ..gsheet_api.read_from_gsheet import read_from_gsheet
+from ..items import GeneralInformationItem, PriceItem
+from ..utils import is_empty_file
 
 settings = get_project_settings()
 wappalyzer = Wappalyzer.latest()
@@ -328,7 +328,7 @@ def normalize_wappalyzer_data(wappalyzer_data: pd.Series) -> pd.DataFrame:
     return pd.json_normalize(wappalyzer_data.apply(ast.literal_eval).tolist())
 
 
-def main(use_cache: bool = True, external_scrape_urls: list[str] = None):
+def main(external_scrape_urls: Optional[list[str]], use_cache: bool = True):
     """_summary_
 
     Args:
@@ -336,10 +336,8 @@ def main(use_cache: bool = True, external_scrape_urls: list[str] = None):
     """
     if not use_cache:
         process = CrawlerProcess(settings)
-        if external_scrape_urls is not None:
-            process.crawl(LeadSpider, external_urls=external_scrape_urls)
-        else:
-            process.crawl(LeadSpider, external_urls=None)
+
+        process.crawl(LeadSpider, external_urls=external_scrape_urls)
         start_time = time.time()
         process.start()
         logging.info("--- %s seconds ---", (time.time() - start_time))
@@ -366,9 +364,4 @@ if __name__ == "__main__":
     )
     # Read arguments from the command line
     args = parser.parse_args()
-    print(
-        "args.use_cache, args.external_scrape_urls",
-        args.use_cache,
-        args.external_scrape_urls,
-    )
     main(args.use_cache, args.external_scrape_urls)

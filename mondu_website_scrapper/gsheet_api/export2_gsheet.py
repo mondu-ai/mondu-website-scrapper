@@ -2,13 +2,13 @@ from datetime import datetime  # pylint: disable=missing-module-docstring
 from pathlib import Path
 from typing import Union
 
-from gsheet_settings import (
+from .gsheet_settings import (
     CLIENT_SECRET_JSON,
     EXPORT_DATA_FOLDER,
     SCOPES,
     SPREADSHEET_NAME,
 )
-from utils import create_worksheet, get_gsheet_client, update_worksheet
+from .utils import create_worksheet, get_gsheet_client, update_worksheet
 
 
 def export_report(
