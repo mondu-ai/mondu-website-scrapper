@@ -14,7 +14,7 @@ from scrapy.utils.project import get_project_settings
 from Wappalyzer import Wappalyzer, WebPage
 
 from mondu_website_scrapper import items
-from mondu_website_scrapper.gsheet_api.read_from_gsheet import read_urls_from_gsheet
+from mondu_website_scrapper.gsheet_api.read_from_gsheet import read_from_gsheet
 from mondu_website_scrapper.items import GeneralInformationItem, PriceItem
 from mondu_website_scrapper.utils import is_empty_file
 
@@ -43,9 +43,7 @@ class LeadSpider(scrapy.Spider):
 
         if self.settings["INPUT_URL_COLUMN_NAME"] is not None:
             input_column = self.settings["INPUT_URL_COLUMN_NAME"]
-            return read_urls_from_gsheet(input_columns=[input_column])[
-                input_column
-            ].tolist()
+            return read_from_gsheet(input_columns=[input_column])[input_column].tolist()
         else:
             return self.settings["START_URLS"]
 

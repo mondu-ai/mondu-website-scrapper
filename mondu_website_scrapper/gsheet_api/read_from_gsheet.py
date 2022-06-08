@@ -9,19 +9,15 @@ from mondu_website_scrapper.gsheet_api.gsheet_settings import (
 from mondu_website_scrapper.gsheet_api.utils import get_gsheet_client
 
 
-def read_urls_from_gsheet(
+def read_from_gsheet(
     input_columns: list,
     spreadsheet_name: str = None,
     worksheet_name: str = "Marketing-Input-Data",
 ):
-    """_summary_
+    """
+    read value from the given gsheet
 
-    Args:
-        spreadsheet_name (str, optional): _description_. Defaults to None.
-        worksheet_name (str, optional): _description_. Defaults to "Marketing-Data-Input".
-
-    Returns:
-        _type_: _description_
+    Returns: a dataframe
     """
     if spreadsheet_name is None:
         spreadsheet_name = SPREADSHEET_NAME
@@ -35,8 +31,3 @@ def read_urls_from_gsheet(
         return pd.DataFrame(input_worksheet.get_all_records(), columns=input_columns)
 
     raise WorksheetNotFound(f"{worksheet_name} not found under the given spreadsheet")
-
-
-# if __name__ == "__main__":
-#     df = read_urls_from_gsheet(input_columns=["company_url"])
-#     logg
