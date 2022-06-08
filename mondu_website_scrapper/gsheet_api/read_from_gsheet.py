@@ -6,7 +6,10 @@ from mondu_website_scrapper.gsheet_api.gsheet_settings import (
     SCOPES,
     SPREADSHEET_NAME,
 )
-from mondu_website_scrapper.gsheet_api.utils import get_gsheet_client
+from mondu_website_scrapper.gsheet_api.utils import (
+    get_gsheet_client,
+    get_gsheet_credential,
+)
 
 
 def read_from_gsheet(
@@ -21,10 +24,9 @@ def read_from_gsheet(
     """
     if spreadsheet_name is None:
         spreadsheet_name = SPREADSHEET_NAME
-    gsheet_client = get_gsheet_client(
-        client_secret_json=CLIENT_SECRET_JSON, scopes=SCOPES
-    )
-
+    client_secret = get_gsheet_credential(client_secret_file=CLIENT_SECRET_JSON)
+    gsheet_client = get_gsheet_client(client_secret=client_secret, scopes=SCOPES)
+    print("client_secret", client_secret)
     spreadsheet = gsheet_client.open(spreadsheet_name)
     if worksheet_name in [sheet.title for sheet in spreadsheet.worksheets()]:
         input_worksheet = spreadsheet.worksheet(worksheet_name)

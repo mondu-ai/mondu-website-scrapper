@@ -8,7 +8,12 @@ from .gsheet_settings import (
     SCOPES,
     SPREADSHEET_NAME,
 )
-from .utils import create_worksheet, get_gsheet_client, update_worksheet
+from .utils import (
+    create_worksheet,
+    get_gsheet_client,
+    get_gsheet_credential,
+    update_worksheet,
+)
 
 
 def export_report(
@@ -26,9 +31,9 @@ def export_report(
     """
     if spreadsheet_name is None:
         spreadsheet_name = SPREADSHEET_NAME
-    gsheet_client = get_gsheet_client(
-        client_secret_json=CLIENT_SECRET_JSON, scopes=SCOPES
-    )
+    client_secret = get_gsheet_credential(client_secret_file=CLIENT_SECRET_JSON)
+    print("client_secret", client_secret)
+    gsheet_client = get_gsheet_client(client_secret=client_secret, scopes=SCOPES)
     now = datetime.now()
     dt_now = now.strftime("%Y/%m/%d %H:%M")
 

@@ -10,17 +10,39 @@ from gspread.exceptions import APIError
 from oauth2client.service_account import ServiceAccountCredentials
 
 
-def get_gsheet_client(client_secret_json: json, scopes: list[str]):
+def get_gsheet_credential(client_secret_file: Union[Path, str]) -> dict:
+    """
+    create gsheet credential json file by reading credentials from .env
+
+    Returns: client credential json file
+    """
+
+    with open(client_secret_file, "r", encoding="utf-8") as file:
+        client_secret = json.load(file)
+        client_secret["private_key_id"] = os.getenv("GSHEET_PRIVATE_KEY_ID")
+        client_secret["private_key"] = os.getenv("GSHEET_PRIVATE_KEY")
+    return client_secret
+
+
+def get_gsheet_client(client_secret: Union[Path, dict], scopes: list[str]):
     """
     get the google sheet client
 
     Returns: return google sheet client
     """
+    if isinstance(client_secret, Path):
+        credentials = ServiceAccountCredentials.from_json_keyfile_name(
+            client_secret,
+            scopes,
+        )
+    elif isinstance(client_secret, dict):
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+            client_secret,
+            scopes,
+        )
+    else:
+        raise Exception("client secret should be either a dict or a path to a file")
 
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(
-        client_secret_json,
-        scopes,
-    )
     return gspread.authorize(credentials)
 
 
