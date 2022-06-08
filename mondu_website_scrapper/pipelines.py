@@ -37,7 +37,7 @@ class MonduWebsiteScrapperPipeline:
         Returns: class with settings
         """
         return cls(
-            file_folder=crawler.settings.get("FILE_FOLDE"),
+            file_folder=crawler.settings.get("FILE_FOLDER"),
         )
 
     def open_spider(self, spider):  # pylint: disable=unused-argument

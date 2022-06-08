@@ -100,6 +100,10 @@ START_URLS = [
     "https://b2b.accushop.at/",
     "https://b2b.akku-maeser.at/",
 ]
+
+# column name of urls given from gsheet
+INPUT_URL_COLUMN_NAME = "company_url"
+
 # file folder for scraped results
 FILE_FOLDER = Path(__file__).parent / "scraped_results"
 

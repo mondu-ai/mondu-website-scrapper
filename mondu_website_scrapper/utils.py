@@ -1,10 +1,12 @@
 """ Define util functions here"""
+import os
 import re
 import string
-from typing import Dict, List
+from pathlib import Path
+from typing import Union
 
 
-def get_normalized_words(words: List) -> List:
+def get_normalized_words(words: list[str]) -> list[str]:
     """
     normalize words by
     1. remove punctuation
@@ -22,7 +24,7 @@ def get_normalized_words(words: List) -> List:
 
 def get_normalized_price(
     data: str, allow_currency: list = None, allow_length: int = 10
-) -> List:
+) -> list[float]:
     """
     extract digits near the currency sign.
     This help functions aims to find all digits between 1 and 10 digits before and after
@@ -44,7 +46,7 @@ def get_normalized_price(
     return [float(p.strip().replace(",", ".")) for p in price_lst]
 
 
-def extract_categories_from_wappalyzer(wappalyzed_categories: Dict) -> Dict:
+def extract_categories_from_wappalyzer(wappalyzed_categories: dict) -> dict:
     """
     refactor dict out of wappalyzer.analyze_with_categories function.
     before construct:
@@ -68,3 +70,9 @@ def extract_categories_from_wappalyzer(wappalyzed_categories: Dict) -> Dict:
                 categories_dict[i].append(key)
     refactor_d = {key: list(set(value)) for key, value in categories_dict.items()}
     return {key: ", ".join(value) for key, value in refactor_d.items()}
+
+
+def is_empty_file(file_path: Union[Path, str]) -> bool:
+    """Check if file is empty by confirming if its size is 0 bytes"""
+
+    return os.path.exists(file_path) and os.stat(file_path).st_size == 0
