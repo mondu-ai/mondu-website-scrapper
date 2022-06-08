@@ -1,4 +1,3 @@
-import fnmatch
 import json
 import logging
 import os
@@ -8,6 +7,7 @@ from typing import Union
 import gspread
 from gspread.exceptions import APIError
 from oauth2client.service_account import ServiceAccountCredentials
+from dotenv import load_dotenv
 
 
 def get_gsheet_credential(client_secret_file: Union[Path, str]) -> dict:
@@ -16,11 +16,13 @@ def get_gsheet_credential(client_secret_file: Union[Path, str]) -> dict:
 
     Returns: client credential json file
     """
+    load_dotenv(os.path.join(Path(__file__).parent.parent, ".env"))
 
     with open(client_secret_file, "r", encoding="utf-8") as file:
         client_secret = json.load(file)
         client_secret["private_key_id"] = os.getenv("GSHEET_PRIVATE_KEY_ID")
         client_secret["private_key"] = os.getenv("GSHEET_PRIVATE_KEY")
+
     return client_secret
 
 
@@ -55,9 +57,8 @@ def get_report_file_name(export_data_folder: Union[Path, str]):
     """
 
     for file in os.listdir(export_data_folder):
-        if fnmatch.fnmatch(file, "__report.cvs"):
-            return file
-        raise ValueError("report csv file not found")
+        if file.endswith("__report.csv"):
+            return export_data_folder / file
 
 
 def create_worksheet(
@@ -95,9 +96,9 @@ def update_worksheet(
 
     spreadsheet = gsheet_client.open(spreadsheet_name)
 
-    report_file_name = get_report_file_name(export_data_folder)
+    report_file_path = get_report_file_name(export_data_folder)
 
-    with open(report_file_name, "r", encoding="utf-8") as file:
+    with open(report_file_path, "r", encoding="utf-8") as file:
         contents = file.read()
 
     body = {
