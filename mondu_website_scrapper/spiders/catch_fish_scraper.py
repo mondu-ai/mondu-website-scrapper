@@ -328,7 +328,7 @@ def normalize_wappalyzer_data(wappalyzer_data: pd.Series) -> pd.DataFrame:
     return pd.json_normalize(wappalyzer_data.apply(ast.literal_eval).tolist())
 
 
-def main(external_scrape_urls: Optional[list[str]], use_cache: bool = True):
+def main(use_cache: bool = True, external_scrape_urls: Optional[list[str]] = None):
     """_summary_
 
     Args:
