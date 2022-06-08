@@ -7,16 +7,19 @@ from typing import Any
 
 import pandas as pd
 import scrapy
+from pandas.errors import EmptyDataError
 from scrapy.crawler import CrawlerProcess
 from scrapy.linkextractors import LinkExtractor
 from scrapy.utils.project import get_project_settings
 from Wappalyzer import Wappalyzer, WebPage
 
 from mondu_website_scrapper import items
+from mondu_website_scrapper.gsheet_api.read_from_gsheet import read_urls_from_gsheet
 from mondu_website_scrapper.items import GeneralInformationItem, PriceItem
+from mondu_website_scrapper.utils import is_empty_file
 
-wappalyzer = Wappalyzer.latest()
 settings = get_project_settings()
+wappalyzer = Wappalyzer.latest()
 
 # pylint: disable=R0201
 
@@ -36,8 +39,30 @@ class LeadSpider(scrapy.Spider):
         "USER_AGENT": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
     }
 
-    start_urls = settings["START_URLS"]
-    print("start_urls", start_urls)
+    def _get_start_urls(self):
+
+        if self.settings["INPUT_URL_COLUMN_NAME"] is not None:
+            input_column = self.settings["INPUT_URL_COLUMN_NAME"]
+            return read_urls_from_gsheet(input_columns=[input_column])[
+                input_column
+            ].tolist()
+        else:
+            return self.settings["START_URLS"]
+
+    def __init__(
+        self,
+        external_urls: list[str],
+        *args,
+        **kwargs,
+    ):
+        super(LeadSpider, self).__init__(*args, **kwargs)
+        self.settings = settings
+        self.external_urls = external_urls
+        if self.external_urls is not None:
+
+            self.start_urls = self.external_urls
+        else:
+            self.start_urls = self._get_start_urls()
 
     def parse(self, response):  # pylint: disable=arguments-differ
         """
@@ -184,7 +209,7 @@ class LeadSpider(scrapy.Spider):
 
     def extract_wappalyzer_data(
         self, response: scrapy.http.response
-    ) -> Dict[str, Dict[str, Any]]:
+    ) -> dict[str, dict[str, Any]]:
         """
         using wappalyzer api extract info
 
@@ -201,7 +226,7 @@ class LeadSpider(scrapy.Spider):
         Returns: A dict with keys of products_avg_price and products_quantity
         """
 
-        self.logger.info("start extracting price...")
+        # self.logger.info("start extracting price...")
         try:
             data = response.body.decode("utf-8").lower()
         except UnicodeDecodeError:
@@ -240,6 +265,13 @@ def _create_report_dataset(
     Returns: None
     """
     file_names = [name.lower() for name, _ in items.__dict__.items() if "Item" in name]
+    if any(
+        [
+            is_empty_file(settings["FILE_FOLDER"] / f"{file_name}.csv")
+            for file_name in file_names
+        ]
+    ):
+        raise EmptyDataError("scraped file is empty or file path does not exist")
 
     dfs = {
         file_name: pd.read_csv(settings["FILE_FOLDER"] / f"{file_name}.csv")
@@ -274,7 +306,7 @@ def _create_report_dataset(
         "company_url"
     )
 
-    save_file_path = settings["FILE_FOLDE"] / f"{LeadSpider.name}__report.csv"
+    save_file_path = settings["FILE_FOLDER"] / f"{LeadSpider.name}__report.csv"
 
     report_df.to_csv(save_file_path)
     logging.info(
@@ -298,7 +330,7 @@ def normalize_wappalyzer_data(wappalyzer_data: pd.Series) -> pd.DataFrame:
     return pd.json_normalize(wappalyzer_data.apply(ast.literal_eval).tolist())
 
 
-def main(use_cache: bool = True):
+def main(use_cache: bool = True, external_scrape_urls: list[str] = None):
     """_summary_
 
     Args:
@@ -306,10 +338,14 @@ def main(use_cache: bool = True):
     """
     if not use_cache:
         process = CrawlerProcess(settings)
-        process.crawl(LeadSpider)
+        if external_scrape_urls is not None:
+            process.crawl(LeadSpider, external_urls=external_scrape_urls)
+        else:
+            process.crawl(LeadSpider, external_urls=None)
         start_time = time.time()
         process.start()
         logging.info("--- %s seconds ---", (time.time() - start_time))
+
     _create_report_dataset()
 
 
@@ -324,7 +360,17 @@ if __name__ == "__main__":
         help="decide if use cached data",
         action=argparse.BooleanOptionalAction,
     )
-
+    parser.add_argument(
+        "--external-scrape-urls",
+        help="pass urls for scraping",
+        nargs="+",
+        type=str,
+    )
     # Read arguments from the command line
     args = parser.parse_args()
-    main(args.use_cache)
+    print(
+        "args.use_cache, args.external_scrape_urls",
+        args.use_cache,
+        args.external_scrape_urls,
+    )
+    main(args.use_cache, args.external_scrape_urls)
