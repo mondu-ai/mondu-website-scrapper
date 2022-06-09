@@ -80,7 +80,7 @@ For more details of Scrapy, I strongly recommend start from their official docum
   * [export2_gsheet.py](./mondu_website_scrapper/gsheet_api/export2_gsheet.py) handles the exporting. We export the report file to the pre-defined gsheet.
   *  [read_from_gsheet.py](./mondu_website_scrapper/gsheet_api/read_from_gsheet.py) handles the importing from the gsheet to a pandas dataframe.
 ## The Main Architecture 
-![Alt text](/mondu_website_scrapper/images/Architecture_of_Scraper.drawio.png?raw=true "Architecture_of_Scraper")
+![Alt text](/images/Architecture_of_Scraper.drawio.png?raw=true "Architecture_of_Scraper")
 
 Shortly speaking, our web scraper will scrapy any  website by given URL, and create two items saved as `generalinformationitem.csv` and `priceitem.csv` file under `mondu_website_scrapper/scraped_results`. The scraped data will be cleaned and engineered, followed by creating the final report file `findingnemo.csv` under the same folder.
 
@@ -138,7 +138,7 @@ pipenv run python spiders/catch_fish_scraper.py --use-cache --no-use-gsheet
 ```
 
 2. Passing an URL from the Gsheet. The specific Gsheet we have created and enabled Google Drive API is [Mondu-Web-Scraper-Data-Import-Export](https://docs.google.com/spreadsheets/d/1G8iNI0tBGOhRBhkPPJFKtqwtDjBi-ENHw3rYLQh0iyM/edit#gid=449735522). So far, everyone in the Mondu Orgnazation should have the access to this sheet. Please append your URL in the worksheet `Marketing-Input-Data` under the column `company_url`.
-![Alt text](/mondu_website_scrapper/images/google_sheet.png?raw=true "Mondu-Web-Scraper-Gsheet"), 
+![Alt text](/images/google_sheet.png?raw=true "Mondu-Web-Scraper-Gsheet"), 
 In the main project folder `mondu_website_scrapper/mondu_website_scrapper`, run the following:
 ```python
 pipenv run python spiders/catch_fish_scraper.py --no-use-cache --use-gsheet
@@ -163,4 +163,4 @@ pipenv run python gsheet_api/export2_gsheet.py
 ```
 The script will create a new worksheet named by
 `Web-Scraper-Report-{the timestamp when sheet is created}`. See the following image:
-![Alt text](/mondu_website_scrapper/images/google_sheet_export.png?raw=true "Mondu-Web-Scraper-Result")
+![Alt text](/images/google_sheet_export.png?raw=true "Mondu-Web-Scraper-Result")
