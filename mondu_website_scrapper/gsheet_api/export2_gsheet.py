@@ -8,7 +8,6 @@ from mondu_website_scrapper.gsheet_api.gsheet_settings import (
     SCOPES,
     SPREADSHEET_NAME,
 )
-
 from mondu_website_scrapper.gsheet_api.utils import (
     create_worksheet,
     get_gsheet_client,

@@ -5,9 +5,10 @@ from pathlib import Path
 from typing import Union
 
 import gspread
+from dotenv import find_dotenv, load_dotenv
 from gspread.exceptions import APIError
 from oauth2client.service_account import ServiceAccountCredentials
-from dotenv import load_dotenv, find_dotenv
+
 from .gsheet_settings import ENV_FILE
 
 load_dotenv(find_dotenv(ENV_FILE), verbose=True)
