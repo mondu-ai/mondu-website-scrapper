@@ -13,10 +13,10 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.utils.project import get_project_settings
 from Wappalyzer import Wappalyzer, WebPage
 
-from .. import items
-from ..gsheet_api.read_from_gsheet import read_from_gsheet
-from ..items import GeneralInformationItem, PriceItem
-from ..utils import is_empty_file
+from mondu_website_scrapper import items
+from mondu_website_scrapper.gsheet_api.read_from_gsheet import read_from_gsheet
+from mondu_website_scrapper.items import GeneralInformationItem, PriceItem
+from mondu_website_scrapper.utils import is_empty_file
 
 settings = get_project_settings()
 wappalyzer = Wappalyzer.latest()
@@ -41,7 +41,8 @@ class LeadSpider(scrapy.Spider):
 
     def _get_start_urls(self):
 
-        if self.settings["INPUT_URL_COLUMN_NAME"] is not None:
+        if self.use_gsheet:
+            # self.settings["INPUT_URL_COLUMN_NAME"] is not None:
             input_column = self.settings["INPUT_URL_COLUMN_NAME"]
             return read_from_gsheet(input_columns=[input_column])[input_column].tolist()
         else:
@@ -50,12 +51,14 @@ class LeadSpider(scrapy.Spider):
     def __init__(
         self,
         external_urls: list[str],
+        use_gsheet: bool,
         *args,
         **kwargs,
     ):
         super(LeadSpider, self).__init__(*args, **kwargs)
         self.settings = settings
         self.external_urls = external_urls
+        self.use_gsheet = use_gsheet
         if self.external_urls is not None:
 
             self.start_urls = self.external_urls
@@ -328,7 +331,11 @@ def normalize_wappalyzer_data(wappalyzer_data: pd.Series) -> pd.DataFrame:
     return pd.json_normalize(wappalyzer_data.apply(ast.literal_eval).tolist())
 
 
-def main(use_cache: bool = True, external_scrape_urls: Optional[list[str]] = None):
+def main(
+    use_cache: bool = True,
+    use_gsheet: bool = True,
+    external_scrape_urls: Optional[list[str]] = None,
+):
     """_summary_
 
     Args:
@@ -337,7 +344,9 @@ def main(use_cache: bool = True, external_scrape_urls: Optional[list[str]] = Non
     if not use_cache:
         process = CrawlerProcess(settings)
 
-        process.crawl(LeadSpider, external_urls=external_scrape_urls)
+        process.crawl(
+            LeadSpider, use_gsheet=use_gsheet, external_urls=external_scrape_urls
+        )
         start_time = time.time()
         process.start()
         logging.info("--- %s seconds ---", (time.time() - start_time))
@@ -357,6 +366,12 @@ if __name__ == "__main__":
         action=argparse.BooleanOptionalAction,
     )
     parser.add_argument(
+        "--use-gsheet",
+        type=bool,
+        help="decide if use gsheet as urls input",
+        action=argparse.BooleanOptionalAction,
+    )
+    parser.add_argument(
         "--external-scrape-urls",
         help="pass urls for scraping",
         nargs="+",
@@ -364,4 +379,4 @@ if __name__ == "__main__":
     )
     # Read arguments from the command line
     args = parser.parse_args()
-    main(args.use_cache, args.external_scrape_urls)
+    main(args.use_cache, args.use_gsheet, args.external_scrape_urls)

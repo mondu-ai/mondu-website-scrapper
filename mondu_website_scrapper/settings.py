@@ -105,7 +105,8 @@ START_URLS = [
 INPUT_URL_COLUMN_NAME = "company_url"
 
 # file folder for scraped results
-FILE_FOLDER = Path(__file__).parent / "scraped_results"
+FILE_FOLDER = Path.cwd().parent / "scraped_results"
+
 
 # webshop searching keywords
 WEBSHOP_KEYWORDS = [
