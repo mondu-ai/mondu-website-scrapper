@@ -10,8 +10,6 @@ This repository is built with the help of Scrapy project structure
 [Scrapy Create A Project](https://docs.scrapy.org/en/latest/intro/tutorial.html).
 
 ### mondu_website_scrapper
-
-# mondu_website_scrapper
 * [images/](./mondu_website_scrapper/images)
   * [Architecture_of_Scraper.drawio.png](./mondu_website_scrapper/images/Architecture_of_Scraper.drawio.png)
   * [google_sheet.png](./mondu_website_scrapper/images/google_sheet.png)
@@ -24,17 +22,12 @@ This repository is built with the help of Scrapy project structure
     * [gsheet_settings.py](./mondu_website_scrapper/mondu_website_scrapper/gsheet_api/gsheet_settings.py)
     * [read_from_gsheet.py](./mondu_website_scrapper/mondu_website_scrapper/gsheet_api/read_from_gsheet.py)
     * [utils.py](./mondu_website_scrapper/mondu_website_scrapper/gsheet_api/utils.py)
-  * [scraped_results/](./mondu_website_scrapper/mondu_website_scrapper/scraped_results)
-    * [findingnemo__report.csv](./mondu_website_scrapper/mondu_website_scrapper/scraped_results/findingnemo__report.csv)
-    * [generalinformationitem.csv](./mondu_website_scrapper/mondu_website_scrapper/scraped_results/generalinformationitem.csv)
-    * [priceitem.csv](./mondu_website_scrapper/mondu_website_scrapper/scraped_results/priceitem.csv)
   * [spiders/](./mondu_website_scrapper/mondu_website_scrapper/spiders)
     * [__init__.py](./mondu_website_scrapper/mondu_website_scrapper/spiders/__init__.py)
     * [catch_fish_scraper.py](./mondu_website_scrapper/mondu_website_scrapper/spiders/catch_fish_scraper.py)
   * [.env](./mondu_website_scrapper/mondu_website_scrapper/.env)
   * [.env.template](./mondu_website_scrapper/mondu_website_scrapper/.env.template)
   * [__init__.py](./mondu_website_scrapper/mondu_website_scrapper/__init__.py)
-  * [export.py](./mondu_website_scrapper/mondu_website_scrapper/export.py)
   * [items.py](./mondu_website_scrapper/mondu_website_scrapper/items.py)
   * [middlewares.py](./mondu_website_scrapper/mondu_website_scrapper/middlewares.py)
   * [pipelines.py](./mondu_website_scrapper/mondu_website_scrapper/pipelines.py)
@@ -46,19 +39,6 @@ This repository is built with the help of Scrapy project structure
   * [priceitem.csv](./mondu_website_scrapper/scraped_results/priceitem.csv)
 * [tests/](./mondu_website_scrapper/tests)
   * [__init__.py](./mondu_website_scrapper/tests/__init__.py)
-* [.flake8](./mondu_website_scrapper/.flake8)
-* [.gitignore](./mondu_website_scrapper/.gitignore)
-* [.pylintrc](./mondu_website_scrapper/.pylintrc)
-* [LICENSE](./mondu_website_scrapper/LICENSE)
-* [Makefile](./mondu_website_scrapper/Makefile)
-* [Pipfile](./mondu_website_scrapper/Pipfile)
-* [Pipfile.lock](./mondu_website_scrapper/Pipfile.lock)
-* [README.md](./mondu_website_scrapper/README.md)
-* [pyproject.toml](./mondu_website_scrapper/pyproject.toml)
-* [scrapy.cfg](./mondu_website_scrapper/scrapy.cfg)
-* [setup.cfg](./mondu_website_scrapper/setup.cfg)
-* [setup.py](./mondu_website_scrapper/setup.py)
-
 
 ### Logic Structure
 The main logic for this project is twofold:
