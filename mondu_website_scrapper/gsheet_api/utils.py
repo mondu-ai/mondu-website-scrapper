@@ -7,7 +7,13 @@ from typing import Union
 import gspread
 from gspread.exceptions import APIError
 from oauth2client.service_account import ServiceAccountCredentials
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
+from .gsheet_settings import ENV_FILE
+
+load_dotenv(find_dotenv(ENV_FILE), verbose=True)
+
+GSHEET_PRIVATE_KEY_ID = os.getenv("GSHEET_PRIVATE_KEY_ID")
+GSHEET_PRIVATE_KEY = os.getenv("GSHEET_PRIVATE_KEY")
 
 
 def get_gsheet_credential(client_secret_file: Union[Path, str]) -> dict:
@@ -16,12 +22,12 @@ def get_gsheet_credential(client_secret_file: Union[Path, str]) -> dict:
 
     Returns: client credential json file
     """
-    load_dotenv(os.path.join(Path(__file__).parent.parent, ".env"))
+    # load_dotenv(os.path.join(Path(__file__).parent.parent, ".env"))
 
     with open(client_secret_file, "r", encoding="utf-8") as file:
         client_secret = json.load(file)
-        client_secret["private_key_id"] = os.getenv("GSHEET_PRIVATE_KEY_ID")
-        client_secret["private_key"] = os.getenv("GSHEET_PRIVATE_KEY")
+        client_secret["private_key_id"] = GSHEET_PRIVATE_KEY_ID
+        client_secret["private_key"] = GSHEET_PRIVATE_KEY
 
     return client_secret
 
