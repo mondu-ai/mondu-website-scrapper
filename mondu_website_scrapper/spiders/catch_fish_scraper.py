@@ -13,10 +13,10 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.utils.project import get_project_settings
 from Wappalyzer import Wappalyzer, WebPage
 
-from .. import items
-from ..gsheet_api.read_from_gsheet import read_from_gsheet
-from ..items import GeneralInformationItem, PriceItem
-from ..utils import is_empty_file
+from mondu_website_scrapper import items
+from mondu_website_scrapper.gsheet_api.read_from_gsheet import read_from_gsheet
+from mondu_website_scrapper.items import GeneralInformationItem, PriceItem
+from mondu_website_scrapper.utils import is_empty_file
 
 settings = get_project_settings()
 wappalyzer = Wappalyzer.latest()
