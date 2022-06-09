@@ -10,8 +10,6 @@ This repository is built with the help of Scrapy project structure
 [Scrapy Create A Project](https://docs.scrapy.org/en/latest/intro/tutorial.html).
 
 ### mondu_website_scrapper
-
-# mondu_website_scrapper
 * [images/](./mondu_website_scrapper/images)
   * [Architecture_of_Scraper.drawio.png](./mondu_website_scrapper/images/Architecture_of_Scraper.drawio.png)
   * [google_sheet.png](./mondu_website_scrapper/images/google_sheet.png)
@@ -24,17 +22,12 @@ This repository is built with the help of Scrapy project structure
     * [gsheet_settings.py](./mondu_website_scrapper/mondu_website_scrapper/gsheet_api/gsheet_settings.py)
     * [read_from_gsheet.py](./mondu_website_scrapper/mondu_website_scrapper/gsheet_api/read_from_gsheet.py)
     * [utils.py](./mondu_website_scrapper/mondu_website_scrapper/gsheet_api/utils.py)
-  * [scraped_results/](./mondu_website_scrapper/mondu_website_scrapper/scraped_results)
-    * [findingnemo__report.csv](./mondu_website_scrapper/mondu_website_scrapper/scraped_results/findingnemo__report.csv)
-    * [generalinformationitem.csv](./mondu_website_scrapper/mondu_website_scrapper/scraped_results/generalinformationitem.csv)
-    * [priceitem.csv](./mondu_website_scrapper/mondu_website_scrapper/scraped_results/priceitem.csv)
   * [spiders/](./mondu_website_scrapper/mondu_website_scrapper/spiders)
     * [__init__.py](./mondu_website_scrapper/mondu_website_scrapper/spiders/__init__.py)
     * [catch_fish_scraper.py](./mondu_website_scrapper/mondu_website_scrapper/spiders/catch_fish_scraper.py)
   * [.env](./mondu_website_scrapper/mondu_website_scrapper/.env)
   * [.env.template](./mondu_website_scrapper/mondu_website_scrapper/.env.template)
   * [__init__.py](./mondu_website_scrapper/mondu_website_scrapper/__init__.py)
-  * [export.py](./mondu_website_scrapper/mondu_website_scrapper/export.py)
   * [items.py](./mondu_website_scrapper/mondu_website_scrapper/items.py)
   * [middlewares.py](./mondu_website_scrapper/mondu_website_scrapper/middlewares.py)
   * [pipelines.py](./mondu_website_scrapper/mondu_website_scrapper/pipelines.py)
@@ -46,19 +39,6 @@ This repository is built with the help of Scrapy project structure
   * [priceitem.csv](./mondu_website_scrapper/scraped_results/priceitem.csv)
 * [tests/](./mondu_website_scrapper/tests)
   * [__init__.py](./mondu_website_scrapper/tests/__init__.py)
-* [.flake8](./mondu_website_scrapper/.flake8)
-* [.gitignore](./mondu_website_scrapper/.gitignore)
-* [.pylintrc](./mondu_website_scrapper/.pylintrc)
-* [LICENSE](./mondu_website_scrapper/LICENSE)
-* [Makefile](./mondu_website_scrapper/Makefile)
-* [Pipfile](./mondu_website_scrapper/Pipfile)
-* [Pipfile.lock](./mondu_website_scrapper/Pipfile.lock)
-* [README.md](./mondu_website_scrapper/README.md)
-* [pyproject.toml](./mondu_website_scrapper/pyproject.toml)
-* [scrapy.cfg](./mondu_website_scrapper/scrapy.cfg)
-* [setup.cfg](./mondu_website_scrapper/setup.cfg)
-* [setup.py](./mondu_website_scrapper/setup.py)
-
 
 ### Logic Structure
 The main logic for this project is twofold:
@@ -70,17 +50,17 @@ The main logic for this project is twofold:
 
 For more details of Scrapy, I strongly recommend start from their official documentation [Scrapy 2.6 Documentation](https://docs.scrapy.org/en/latest/index.html).
 
-1. **Wrangle and export scraping results to a Gsheet**: As how LeadSpider searched and scrapped websites are clearly explained under the documentation Mondu Web Scraper - MVP, we will not dive any deeper here. The main steps for exporting scraping results are:
-  * Create a mondu website scraper project under the Mondu organization in Google cloud.
-  * Enable Google Drive API and Google Sheet API for this project.
-  * Create and download the client credential file.
-  * The [gsheet_api/utils.py](./mondu_website_scrapper/gsheet_api/utils.py) file contains functions to get Gsheet credentials, create API client, create gsheet and worksheet etc.
-  * [gsheet_settings.py](./mondu_website_scrapper/gsheet_api/gsheet_settings.py) defines the target gsheet where we want to export data to, gsheet scopes etc.
-  * [client_secret.json](./mondu_website_scrapper/gsheet_api/client_secret.json) The client secret json file is the credential of Google Drive API of the gsheet. The secret GSHEET_PRIVATE_KEY_ID and GSHEET_PRIVATE_KEY are `null` at the moment. It will be shared by one password for people who will use this project.
-  * [export2_gsheet.py](./mondu_website_scrapper/gsheet_api/export2_gsheet.py) handles the exporting. We export the report file to the pre-defined gsheet.
-  *  [read_from_gsheet.py](./mondu_website_scrapper/gsheet_api/read_from_gsheet.py) handles the importing from the gsheet to a pandas dataframe.
+2. **Wrangle and export scraping results to a Gsheet**: As how LeadSpider searched and scrapped websites are clearly explained under the documentation Mondu Web Scraper - MVP, we will not dive any deeper here. The main steps for exporting scraping results are:
+   * Create a mondu website scraper project under the Mondu organization in Google cloud.
+   * Enable Google Drive API and Google Sheet API for this project.
+   * Create and download the client credential file.
+   * The [gsheet_api/utils.py](./mondu_website_scrapper/gsheet_api/utils.py) file contains functions to get Gsheet credentials, create API client, create gsheet and worksheet etc.
+   * [gsheet_settings.py](./mondu_website_scrapper/gsheet_api/gsheet_settings.py) defines the target gsheet where we want to export data to, gsheet scopes etc.
+   * [client_secret.json](./mondu_website_scrapper/gsheet_api/client_secret.json) The client secret json file is the credential of Google Drive API of the gsheet. The secret GSHEET_PRIVATE_KEY_ID and GSHEET_PRIVATE_KEY are `null` at the moment. It will be shared by one password for people who will use this project.
+   * [export2_gsheet.py](./mondu_website_scrapper/gsheet_api/export2_gsheet.py) handles the exporting. We export the report file to the pre-defined gsheet.
+   *  [read_from_gsheet.py](./mondu_website_scrapper/gsheet_api/read_from_gsheet.py) handles the importing from the gsheet to a pandas dataframe.
 ## The Main Architecture 
-![Alt text](/mondu_website_scrapper/images/Architecture_of_Scraper.drawio.png?raw=true "Architecture_of_Scraper")
+![Alt text](/images/Architecture_of_Scraper.drawio.png?raw=true "Architecture_of_Scraper")
 
 Shortly speaking, our web scraper will scrapy any  website by given URL, and create two items saved as `generalinformationitem.csv` and `priceitem.csv` file under `mondu_website_scrapper/scraped_results`. The scraped data will be cleaned and engineered, followed by creating the final report file `findingnemo.csv` under the same folder.
 
@@ -138,8 +118,8 @@ pipenv run python spiders/catch_fish_scraper.py --use-cache --no-use-gsheet
 ```
 
 2. Passing an URL from the Gsheet. The specific Gsheet we have created and enabled Google Drive API is [Mondu-Web-Scraper-Data-Import-Export](https://docs.google.com/spreadsheets/d/1G8iNI0tBGOhRBhkPPJFKtqwtDjBi-ENHw3rYLQh0iyM/edit#gid=449735522). So far, everyone in the Mondu Orgnazation should have the access to this sheet. Please append your URL in the worksheet `Marketing-Input-Data` under the column `company_url`.
-![Alt text](/mondu_website_scrapper/images/google_sheet.png?raw=true "Mondu-Web-Scraper-Gsheet"), 
-In the main project folder `mondu_website_scrapper/mondu_website_scrapper`, run the following:
+![Alt text](/images/google_sheet.png?raw=true "Mondu-Web-Scraper-Gsheet")
+Then in the main project folder `mondu_website_scrapper/mondu_website_scrapper`, run the following:
 ```python
 pipenv run python spiders/catch_fish_scraper.py --no-use-cache --use-gsheet
 ```
@@ -163,4 +143,4 @@ pipenv run python gsheet_api/export2_gsheet.py
 ```
 The script will create a new worksheet named by
 `Web-Scraper-Report-{the timestamp when sheet is created}`. See the following image:
-![Alt text](/mondu_website_scrapper/images/google_sheet_export.png?raw=true "Mondu-Web-Scraper-Result")
+![Alt text](/images/google_sheet_export.png?raw=true "Mondu-Web-Scraper-Result")
