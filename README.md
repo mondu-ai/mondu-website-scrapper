@@ -70,15 +70,15 @@ The main logic for this project is twofold:
 
 For more details of Scrapy, I strongly recommend start from their official documentation [Scrapy 2.6 Documentation](https://docs.scrapy.org/en/latest/index.html).
 
-1. **Wrangle and export scraping results to a Gsheet**: As how LeadSpider searched and scrapped websites are clearly explained under the documentation Mondu Web Scraper - MVP, we will not dive any deeper here. The main steps for exporting scraping results are:
-  * Create a mondu website scraper project under the Mondu organization in Google cloud.
-  * Enable Google Drive API and Google Sheet API for this project.
-  * Create and download the client credential file.
-  * The [gsheet_api/utils.py](./mondu_website_scrapper/gsheet_api/utils.py) file contains functions to get Gsheet credentials, create API client, create gsheet and worksheet etc.
-  * [gsheet_settings.py](./mondu_website_scrapper/gsheet_api/gsheet_settings.py) defines the target gsheet where we want to export data to, gsheet scopes etc.
-  * [client_secret.json](./mondu_website_scrapper/gsheet_api/client_secret.json) The client secret json file is the credential of Google Drive API of the gsheet. The secret GSHEET_PRIVATE_KEY_ID and GSHEET_PRIVATE_KEY are `null` at the moment. It will be shared by one password for people who will use this project.
-  * [export2_gsheet.py](./mondu_website_scrapper/gsheet_api/export2_gsheet.py) handles the exporting. We export the report file to the pre-defined gsheet.
-  *  [read_from_gsheet.py](./mondu_website_scrapper/gsheet_api/read_from_gsheet.py) handles the importing from the gsheet to a pandas dataframe.
+2. **Wrangle and export scraping results to a Gsheet**: As how LeadSpider searched and scrapped websites are clearly explained under the documentation Mondu Web Scraper - MVP, we will not dive any deeper here. The main steps for exporting scraping results are:
+   * Create a mondu website scraper project under the Mondu organization in Google cloud.
+   * Enable Google Drive API and Google Sheet API for this project.
+   * Create and download the client credential file.
+   * The [gsheet_api/utils.py](./mondu_website_scrapper/gsheet_api/utils.py) file contains functions to get Gsheet credentials, create API client, create gsheet and worksheet etc.
+   * [gsheet_settings.py](./mondu_website_scrapper/gsheet_api/gsheet_settings.py) defines the target gsheet where we want to export data to, gsheet scopes etc.
+   * [client_secret.json](./mondu_website_scrapper/gsheet_api/client_secret.json) The client secret json file is the credential of Google Drive API of the gsheet. The secret GSHEET_PRIVATE_KEY_ID and GSHEET_PRIVATE_KEY are `null` at the moment. It will be shared by one password for people who will use this project.
+   * [export2_gsheet.py](./mondu_website_scrapper/gsheet_api/export2_gsheet.py) handles the exporting. We export the report file to the pre-defined gsheet.
+   *  [read_from_gsheet.py](./mondu_website_scrapper/gsheet_api/read_from_gsheet.py) handles the importing from the gsheet to a pandas dataframe.
 ## The Main Architecture 
 ![Alt text](/images/Architecture_of_Scraper.drawio.png?raw=true "Architecture_of_Scraper")
 
