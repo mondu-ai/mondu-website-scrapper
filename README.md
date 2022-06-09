@@ -138,8 +138,8 @@ pipenv run python spiders/catch_fish_scraper.py --use-cache --no-use-gsheet
 ```
 
 2. Passing an URL from the Gsheet. The specific Gsheet we have created and enabled Google Drive API is [Mondu-Web-Scraper-Data-Import-Export](https://docs.google.com/spreadsheets/d/1G8iNI0tBGOhRBhkPPJFKtqwtDjBi-ENHw3rYLQh0iyM/edit#gid=449735522). So far, everyone in the Mondu Orgnazation should have the access to this sheet. Please append your URL in the worksheet `Marketing-Input-Data` under the column `company_url`.
-![Alt text](/images/google_sheet.png?raw=true "Mondu-Web-Scraper-Gsheet"), 
-In the main project folder `mondu_website_scrapper/mondu_website_scrapper`, run the following:
+![Alt text](/images/google_sheet.png?raw=true "Mondu-Web-Scraper-Gsheet")
+Then in the main project folder `mondu_website_scrapper/mondu_website_scrapper`, run the following:
 ```python
 pipenv run python spiders/catch_fish_scraper.py --no-use-cache --use-gsheet
 ```
