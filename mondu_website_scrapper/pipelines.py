@@ -4,6 +4,7 @@
 import logging
 
 from scrapy.exporters import CsvItemExporter
+from scrapy.item import Item
 
 from mondu_website_scrapper import items
 from mondu_website_scrapper.utils import extract_categories_from_wappalyzer
@@ -31,7 +32,7 @@ class MonduWebsiteScrapperPipeline:
         self.file_folder.mkdir(parents=True, exist_ok=True)
 
     @classmethod
-    def from_crawler(cls, crawler):
+    def from_crawler(cls, crawler) -> object:
         """
         get settings from settings.py
         Returns: class with settings
@@ -40,7 +41,7 @@ class MonduWebsiteScrapperPipeline:
             file_folder=crawler.settings.get("FILE_FOLDER"),
         )
 
-    def open_spider(self, spider):  # pylint: disable=unused-argument
+    def open_spider(self, spider) -> None:  # pylint: disable=unused-argument
         """
         open file, define exporter and start exporting
         """
@@ -58,7 +59,7 @@ class MonduWebsiteScrapperPipeline:
         for exporter in self.exporters.values():
             exporter.start_exporting()
 
-    def close_spider(self, spider):  # pylint: disable=unused-argument
+    def close_spider(self, spider) -> None:  # pylint: disable=unused-argument
         """
         finishining exporting and close the file
         """
@@ -68,7 +69,7 @@ class MonduWebsiteScrapperPipeline:
         for file in self.files.values():
             file.close()
 
-    def process_item(self, item, spider):  # pylint: disable=unused-argument
+    def process_item(self, item, spider) -> Item:  # pylint: disable=unused-argument
         """
         process items scrapped from web.
         1. only the wappalyzer item needs to be processed. check function
