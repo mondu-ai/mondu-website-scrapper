@@ -1,5 +1,6 @@
 """ create final scraped report"""
 import ast
+import csv
 import logging
 from dataclasses import dataclass
 from functools import reduce
@@ -57,6 +58,7 @@ class CreateReportDataSet:
                 data_concat["webshop_system"].isnull(), data_concat["Ecommerce"]
             )
         )
+
         data_concat["web_system/ecommerce"] = (
             data_concat["webshop_system"] + "," + data_concat["Ecommerce"]
         )
@@ -160,7 +162,7 @@ class CreateReportDataSet:
 
         save_file_path = settings["FILE_FOLDER"] / f"{self.leadspider_name}__report.csv"
 
-        report_df.to_csv(save_file_path, sep="\t")
+        report_df.to_csv(save_file_path, sep=",", quoting=csv.QUOTE_NONNUMERIC)
         logging.info(
             "final report dataframe is of %s, saved under %s",
             report_df.shape,
