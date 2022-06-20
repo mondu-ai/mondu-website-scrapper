@@ -97,6 +97,7 @@ START_URLS = [
     "https://www.heimwerkertools.com/b2b",
     "http://www.mysortimo.at",
     "https://shop.bibus.at/",
+    "https://www.maw.co.at/",
 ]
 
 # column name of urls given from gsheet
@@ -183,7 +184,9 @@ PRICE_PATTERN = (
     r"\d*[\.\,]?\d+(?=\s?[$|EUR|€|GBP|£])|(?<=[$|EUR|€|GBP|£])\s?\d*[\.\,]?\d+"
 )
 
-# PHONE_COUNTRY_CODE = "\+43|\+49"
+# searching phone pattern
+# TODO write tests for it
 PHONE_PATTERN = r"(?:\B\+ ?43|\+49)(?: *[(-]? *\d(?:[ \d]*\d)?)? *(?:[)-] *)?\d+ *(?:[/)-] *)?\d+ *(?:[/)-] *)?\d+(?: *- *\d+)?"  # pylint: disable=line-too-long
+
+# searching email pattern
 EMAIL_PATTERN = r"[\w.+-]+@[\w-]+\.[\w.-]+"
-# PHONE_PATTERN = r"(?:\B\+ ?43|\b0|\+49).*(?=\n)"

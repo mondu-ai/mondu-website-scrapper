@@ -195,14 +195,10 @@ class LeadSpider(scrapy.Spider):
         except UnicodeDecodeError:
             data = response.body.decode("ISO-8859-1").lower()
 
-        b2b_key_dict = {}
+        b2b_key_lst = []
         for word in b2b_keywords:
-            if re.search(word, data) is not None:
-                b2b_key_dict[word] = True
-            else:
-                b2b_key_dict[word] = False
-
-        return [k for k, v in b2b_key_dict.items() if v]
+            b2b_key_lst += [word] if re.search(word, data) is not None else []
+        return b2b_key_lst
 
     def extract_webshop_system(self, response: scrapy.http.response) -> list:
         """
