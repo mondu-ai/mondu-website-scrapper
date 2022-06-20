@@ -33,7 +33,7 @@ def get_gsheet_credential(client_secret_file: Union[Path, str]) -> dict:
     return client_secret
 
 
-def get_gsheet_client(client_secret: Union[Path, dict], scopes: list[str]):
+def get_gsheet_client(client_secret: Union[Path, dict], scopes: list[str]) -> dict:
     """
     get the google sheet client
 
@@ -55,7 +55,7 @@ def get_gsheet_client(client_secret: Union[Path, dict], scopes: list[str]):
     return gspread.authorize(credentials)
 
 
-def get_report_file_name(export_data_folder: Union[Path, str]):
+def get_report_file_name(export_data_folder: Union[Path, str]) -> Path:
     """
     get the report csv file from the export data folder
 
@@ -74,7 +74,7 @@ def create_worksheet(
     title: str,
     rows: int = 1000,
     cols: int = 50,
-):
+) -> str:
     """
     create a new worksheet in the current spreadsheet
 
