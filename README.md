@@ -31,9 +31,11 @@ This repository is built with the help of Scrapy project structure
   * [items.py](./mondu_website_scrapper/mondu_website_scrapper/items.py)
   * [middlewares.py](./mondu_website_scrapper/mondu_website_scrapper/middlewares.py)
   * [pipelines.py](./mondu_website_scrapper/mondu_website_scrapper/pipelines.py)
+  * [report.py](./mondu_website_scrapper/mondu_website_scrapper/report.py)
   * [settings.py](./mondu_website_scrapper/mondu_website_scrapper/settings.py)
   * [utils.py](./mondu_website_scrapper/mondu_website_scrapper/utils.py)
 * [scraped_results/](./mondu_website_scrapper/scraped_results)
+  * [contactitem.csv](./mondu_website_scrapper/scraped_results/contactitem.csv) 
   * [findingnemo__report.csv](./mondu_website_scrapper/scraped_results/findingnemo__report.csv)
   * [generalinformationitem.csv](./mondu_website_scrapper/scraped_results/generalinformationitem.csv)
   * [priceitem.csv](./mondu_website_scrapper/scraped_results/priceitem.csv)
@@ -144,3 +146,11 @@ pipenv run python gsheet_api/export2_gsheet.py
 The script will create a new worksheet named by
 `Web-Scraper-Report-{the timestamp when sheet is created}`. See the following image:
 ![Alt text](/images/google_sheet_export.png?raw=true "Mondu-Web-Scraper-Result")
+
+### Output and Save Logfile
+To write and save logfile in local file system, please go to spider folder `/mondu_website_scrapper/mondu_website_scrapper/spiders`, then run the following:
+```python
+scrapy runspider catch_fish_scraper.py -a use_gsheet=True -o scraped_result.json --logfile scraped_log.log
+```
+It will export and save scraping results as `scraped_result.json`, and logfile as `scraped_log.log`
+under the same folder.
