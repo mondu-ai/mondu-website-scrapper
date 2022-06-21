@@ -42,6 +42,7 @@ class LeadSpider(scrapy.Spider):
         if self.use_gsheet:
             # self.settings["INPUT_URL_COLUMN_NAME"] is not None:
             input_column = self.settings["INPUT_URL_COLUMN_NAME"]
+
             return (
                 read_from_gsheet(input_columns=[input_column])[input_column]
                 .unique()
@@ -50,16 +51,11 @@ class LeadSpider(scrapy.Spider):
         else:
             return self.settings["START_URLS"]
 
-    def __init__(
-        self,
-        external_urls: list[str],
-        use_gsheet: bool,
-        *args,
-        **kwargs,
-    ):
+    def __init__(self, use_gsheet: bool, *args, **kwargs):
         super(LeadSpider, self).__init__(*args, **kwargs)
         self.settings = settings
-        self.external_urls = external_urls
+
+        self.external_urls = kwargs.get("external_urls", None)
         self.use_gsheet = use_gsheet
         if self.external_urls is not None:
 
@@ -98,12 +94,14 @@ class LeadSpider(scrapy.Spider):
                 link.url,
                 callback=self.extract_price_info,
                 cb_kwargs={"company_url": response.url},
+                dont_filter=True,
             )
 
         # get information for contact information
 
         link_contact_extractor = LinkExtractor(
-            allow=f"{response.url}.*(impressum|kontakt)", unique=True
+            allow=f"{response.url}.*(impressum|kontakt)",
+            unique=True,
         )
 
         for link in link_contact_extractor.extract_links(response):
@@ -112,6 +110,7 @@ class LeadSpider(scrapy.Spider):
                 link.url,
                 callback=self.extract_contact_information,
                 cb_kwargs={"company_url": response.url},
+                dont_filter=True,
             )
 
         # get information for social media
@@ -127,7 +126,7 @@ class LeadSpider(scrapy.Spider):
 
         yield item
 
-    def extract_webshop_url(self, response) -> list:
+    def extract_webshop_url(self, response: scrapy.http.response) -> list:
         """
         extract links that contains keywords related to webshop
 
