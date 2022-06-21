@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Union
 
 
-def get_normalized_words(words: list[str]) -> list[str]:
+def normalize_words(words: list[str]) -> list[str]:
     """
     normalize words by
     1. remove punctuation
@@ -22,7 +22,7 @@ def get_normalized_words(words: list[str]) -> list[str]:
     return [word.lower() for word in remove_pun]
 
 
-def get_normalized_price(
+def normalize_price(
     data: str, allow_currency: list = None, allow_length: int = 10
 ) -> list[float]:
     """
@@ -76,3 +76,27 @@ def is_empty_file(file_path: Union[Path, str]) -> bool:
     """Check if file is empty by confirming if its size is 0 bytes"""
 
     return os.path.exists(file_path) and os.stat(file_path).st_size == 0
+
+
+def normalize_phone_format(phone_string: str, country_code: list[str]) -> str:
+    """normalize a string of phone number
+    1.
+
+    Args:
+        phone_string (str): _description_
+
+    Returns: normalized phone string
+    """
+    if phone_string is not None:
+        if not isinstance(phone_string, str):
+            phone_string = str(phone_string)
+        phone_string = re.sub(r"\(|\)|-|\/", "", phone_string)
+        phone_string = phone_string.replace("+", "00")
+        for code in country_code:
+            phone_string = (
+                "".join(["00", phone_string])
+                if phone_string.startswith(code)
+                else phone_string
+            )
+        return phone_string.replace(" ", "")
+    return phone_string
