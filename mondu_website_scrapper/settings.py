@@ -93,15 +93,21 @@ ITEM_PIPELINES = {
 
 # start urls input
 START_URLS = [
-    "https://www.nasensauger.net/",
+    "https://www.microsoft.com/de-at",
+    "https://www.giesswein.com/",
     "https://www.heimwerkertools.com/b2b",
-    "http://www.mysortimo.at",
-    "https://shop.bibus.at/",
-    "https://www.maw.co.at/",
+    "https://www.atombody.at/",
+    "https://www.eposcomputer.com/epos-business-center/",
+    "https://gesa.at/en/",
+    "https://www.flyeralarm.com/de/",
+    "https://www.muenzeoesterreich.at/",
+    "https://www.fischersports.com/at_en",
+    "https://shop.mcshark.at/zubehoer",
+    "https://jysk.at/",
 ]
 
 # column name of urls given from gsheet
-INPUT_URL_COLUMN_NAME = "get_url_value"
+INPUT_URL_COLUMN_NAME = "company_url_cleaned"
 
 # file folder for scraped results
 FILE_FOLDER = Path.cwd().parent / "scraped_results"
