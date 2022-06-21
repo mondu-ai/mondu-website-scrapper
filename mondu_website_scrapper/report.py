@@ -10,7 +10,7 @@ import pandas as pd
 from scrapy.utils.project import get_project_settings
 
 from mondu_website_scrapper import items
-from mondu_website_scrapper.utils import is_empty_file
+from mondu_website_scrapper.utils import is_empty_file, normalize_phone_format
 
 settings = get_project_settings()
 
@@ -24,6 +24,7 @@ class CreateReportDataSet:
 
     join_index: str = "company_url"
     wappalyzer_data_column: str = "wappalyzer"
+    phone_data_column: str = "phone"
     leadspider_name: str = "findingnemo"
     wappalyzed_data_keys: list[str] = None
 
@@ -95,12 +96,23 @@ class CreateReportDataSet:
 
         Returns: engineered dataframe
         """
-        data = data.groupby(self.join_index).sum().replace(0, np.nan)
-        for col in data.columns:
-            data.loc[:, col] = data[col].apply(
-                lambda x: list(set(x.split(","))) if not x else x
+        data.loc[:, self.phone_data_column] = data[self.phone_data_column].apply(
+            lambda x: normalize_phone_format(x, country_code=["43", "49"])
+        )
+
+        for col in [i for i in data.columns if i != self.join_index]:
+            data.replace(np.nan, "nan", inplace=True)
+            data[col] = data.groupby(self.join_index)[col].transform(
+                lambda x: ",".join(x)
             )
-        return data
+
+        data_drop = data.drop_duplicates()
+
+        for col in data_drop.columns:
+            data_drop.loc[:, col] = data_drop[col].apply(
+                lambda x: ";".join([x for x in x.split(",") if x != "nan"])
+            )
+        return data_drop.set_index(self.join_index)
 
     def _normalize_wappalyzer_data(self, wappalyzer_data: pd.Series) -> pd.DataFrame:
 
@@ -111,7 +123,7 @@ class CreateReportDataSet:
 
         Returns: a pandas dataframe
         """
-        wappalyzer_data.apply(lambda x: x.replace("'", '"'))
+        wappalyzer_data = wappalyzer_data.str.replace("'", '"', regex=True)
 
         return pd.json_normalize(wappalyzer_data.apply(ast.literal_eval).tolist())
 
