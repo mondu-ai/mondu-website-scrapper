@@ -1,22 +1,19 @@
 """ Define scraper spider"""
-import ast
+
 import logging
 import re
 import time
 from typing import Any, Optional
 
-import pandas as pd
 import scrapy
-from pandas.errors import EmptyDataError
 from scrapy.crawler import CrawlerProcess
 from scrapy.linkextractors import LinkExtractor
 from scrapy.utils.project import get_project_settings
 from Wappalyzer import Wappalyzer, WebPage
 
-from mondu_website_scrapper import items
 from mondu_website_scrapper.gsheet_api.read_from_gsheet import read_from_gsheet
-from mondu_website_scrapper.items import GeneralInformationItem, PriceItem
-from mondu_website_scrapper.utils import is_empty_file
+from mondu_website_scrapper.items import ContactItem, GeneralInformationItem, PriceItem
+from mondu_website_scrapper.report import CreateReportDataSet
 
 settings = get_project_settings()
 wappalyzer = Wappalyzer.latest()
@@ -28,7 +25,8 @@ class LeadSpider(scrapy.Spider):
     """
     our first spider for crawling web pages.
 
-    Returns: the direct returns are items that in python dictionary format. It will be later passed to pipelines.
+    Returns: the direct returns are items that in python dictionary format.
+    It will be later passed to pipelines.
 
     Yields: yeild an item and item pipeline will export it as a csv file
     """
@@ -44,20 +42,20 @@ class LeadSpider(scrapy.Spider):
         if self.use_gsheet:
             # self.settings["INPUT_URL_COLUMN_NAME"] is not None:
             input_column = self.settings["INPUT_URL_COLUMN_NAME"]
-            return read_from_gsheet(input_columns=[input_column])[input_column].tolist()
+
+            return (
+                read_from_gsheet(input_columns=[input_column])[input_column]
+                .unique()
+                .tolist()
+            )
         else:
             return self.settings["START_URLS"]
 
-    def __init__(
-        self,
-        external_urls: list[str],
-        use_gsheet: bool,
-        *args,
-        **kwargs,
-    ):
+    def __init__(self, use_gsheet: bool, *args, **kwargs):
         super(LeadSpider, self).__init__(*args, **kwargs)
         self.settings = settings
-        self.external_urls = external_urls
+
+        self.external_urls = kwargs.get("external_urls", None)
         self.use_gsheet = use_gsheet
         if self.external_urls is not None:
 
@@ -65,7 +63,7 @@ class LeadSpider(scrapy.Spider):
         else:
             self.start_urls = self._get_start_urls()
 
-    def parse(self, response):  # pylint: disable=arguments-differ
+    def parse(self, response) -> scrapy.Item:  # pylint: disable=arguments-differ
         """
         the parse method inherited from scrapy.Spider. overwrite it with our own returns.
 
@@ -73,6 +71,7 @@ class LeadSpider(scrapy.Spider):
         """
         item = GeneralInformationItem()
         item["company_url"] = response.url
+        item["status"] = response.status
         languages = response.css("html").xpath("@lang")
         for lang in languages:
             item["languages"] = lang.get()
@@ -82,20 +81,52 @@ class LeadSpider(scrapy.Spider):
         item["webshop_system"] = self.extract_webshop_system(response)
         item["tagged_by_b2b_words"] = self.extract_b2b_keywords(response)
         item["wappalyzer"] = self.extract_wappalyzer_data(response)
+
+        # get information for product
         link_prod_extractor = LinkExtractor(
             allow=f"{response.url}.*(collection|product|produkte|kategories|categories)",
             unique=True,
         )
+
         for link in link_prod_extractor.extract_links(response):
-            print("sending request to product page...")
+            self.logger.info("sending request to product page...")
             yield scrapy.Request(
                 link.url,
                 callback=self.extract_price_info,
                 cb_kwargs={"company_url": response.url},
+                dont_filter=True,
             )
+
+        # get information for contact information
+
+        link_contact_extractor = LinkExtractor(
+            allow=f"{response.url}.*(impressum|kontakt)",
+            unique=True,
+        )
+
+        for link in link_contact_extractor.extract_links(response):
+            self.logger.info("sending request to contact information page...")
+            yield scrapy.Request(
+                link.url,
+                callback=self.extract_contact_information,
+                cb_kwargs={"company_url": response.url},
+                dont_filter=True,
+            )
+
+        # get information for social media
+        link_social_media_extractor = LinkExtractor(
+            allow="linkedin|facebook|youtube|twitter|instagram|xing", unique=True
+        )
+        social_media_lst = []
+
+        for link in link_social_media_extractor.extract_links(response):
+            self.logger.info("looking for social media hyperlinks...")
+            social_media_lst.append(link.url)
+        item["social_media"] = social_media_lst
+
         yield item
 
-    def extract_webshop_url(self, response) -> list:
+    def extract_webshop_url(self, response: scrapy.http.response) -> list:
         """
         extract links that contains keywords related to webshop
 
@@ -156,7 +187,6 @@ class LeadSpider(scrapy.Spider):
 
         Returns: a list of b2b keywords if they are presented
         """
-        item = GeneralInformationItem()
         b2b_keywords = self.settings["B2B_KEYWORDS"]
 
         try:
@@ -164,18 +194,10 @@ class LeadSpider(scrapy.Spider):
         except UnicodeDecodeError:
             data = response.body.decode("ISO-8859-1").lower()
 
-        b2b_key_dict = {}
+        b2b_key_lst = []
         for word in b2b_keywords:
-            if re.search(word, data) is not None:
-                b2b_key_dict[word] = True
-            else:
-                b2b_key_dict[word] = False
-        if any(value is True for value in b2b_key_dict.values()):
-            item["tagged_as_b2b"] = True
-        else:
-            item["tagged_as_b2b"] = False
-
-        return [k for k, v in b2b_key_dict.items() if v]
+            b2b_key_lst += [word] if re.search(word, data) is not None else []
+        return b2b_key_lst
 
     def extract_webshop_system(self, response: scrapy.http.response) -> list:
         """
@@ -219,7 +241,9 @@ class LeadSpider(scrapy.Spider):
         webpage = WebPage.new_from_url(response.url)
         return wappalyzer.analyze_with_categories(webpage)
 
-    def extract_price_info(self, response: scrapy.http.response, company_url) -> dict:
+    def extract_price_info(
+        self, response: scrapy.http.response, company_url: str
+    ) -> scrapy.Item:
         """
         extract price information by matching any numeric up to 10 digits before and after
         decimal indicator comma or dot for currency € and $
@@ -253,93 +277,48 @@ class LeadSpider(scrapy.Spider):
             }
         )
 
+    def extract_contact_information(
+        self, response: scrapy.http.response, company_url: str
+    ) -> scrapy.Item:
+        """
+        extract phone and email address from imprint and contact page
+        the way to extract those information is quite fuzzy.
+        I am brutally searching within imprint and contact page anything digits starting from
+        +43 and +49 for AU and DE market respectively.
 
-def _create_report_dataset(
-    wappalyzer_data_column: str = "wappalyzer",
-):
-    """
-    create final report for scrapped results
-    1. assume we will always have wappalyzer data in the column as this is the part of the pipeline.
-    this part of data is normalized and then converted from a pandas series of dict into columns
-    2. the report is saved under default result folder with the surffix __report
-
-    Returns: None
-    """
-    file_names = [name.lower() for name, _ in items.__dict__.items() if "Item" in name]
-    if any(
-        [
-            is_empty_file(settings["FILE_FOLDER"] / f"{file_name}.csv")
-            for file_name in file_names
-        ]
-    ):
-        raise EmptyDataError("scraped file is empty or file path does not exist")
-
-    dfs = {
-        file_name: pd.read_csv(settings["FILE_FOLDER"] / f"{file_name}.csv")
-        for file_name in file_names
-    }
-
-    eng_dfs = {}
-    for file_name, scraped_df in dfs.items():
-        logging.info("scraped %s dataframe is of %s", file_name, scraped_df.shape)
-        if "general" in file_name:
-            eng_dfs["wappalyzed_df"] = normalize_wappalyzer_data(
-                scraped_df[wappalyzer_data_column]
-            )
-            scraped_df.drop(wappalyzer_data_column, inplace=True, axis=1)
-            eng_dfs["general_df"] = scraped_df
-
-        else:
-            eng_dfs["price_df"] = (
-                scraped_df.groupby("company_url")
-                .agg(
-                    {
-                        "products_avg_price": "mean",
-                        "currency": "first",
-                        "products_quantity": "sum",
-                    }
-                )
-                .rename(columns={"products_quantity": "total_num_products"})
-            )
-
-    report_df = eng_dfs["general_df"].join(eng_dfs["price_df"], on="company_url")
-    report_df = pd.concat([report_df, eng_dfs["wappalyzed_df"]], axis=1).set_index(
-        "company_url"
-    )
-
-    save_file_path = settings["FILE_FOLDER"] / f"{LeadSpider.name}__report.csv"
-
-    report_df.to_csv(save_file_path)
-    logging.info(
-        "final report dataframe is of %s, saved under %s",
-        report_df.shape,
-        save_file_path,
-    )
-
-
-def normalize_wappalyzer_data(wappalyzer_data: pd.Series) -> pd.DataFrame:
-
-    """
-    normalize the result of wappalyzed api data and create a pandas dataframe
-    1. convert to json
-    2.apply json normalize to the whole column
-
-    Returns: a pandas dataframe
-    """
-    wappalyzer_data.apply(lambda x: x.replace("'", '"'))
-
-    return pd.json_normalize(wappalyzer_data.apply(ast.literal_eval).tolist())
+        Returns: A ContactItem
+        """
+        try:
+            data = response.body.decode("utf-8").lower()
+        except UnicodeDecodeError:
+            data = response.body.decode("ISO-8859-1").lower()
+        phone_pattern = self.settings["PHONE_PATTERN"]
+        email_pattern = self.settings["EMAIL_PATTERN"]
+        phone = re.findall(phone_pattern, data)
+        email = re.findall(email_pattern, data)
+        yield ContactItem(
+            **{
+                "company_url": company_url,
+                "contact_information_url": response.url,
+                "phone": list(set(phone)),
+                "email": list(set(email)),
+            }
+        )
 
 
 def main(
     use_cache: bool = True,
     use_gsheet: bool = True,
     external_scrape_urls: Optional[list[str]] = None,
-):
-    """_summary_
+) -> None:
+    """
+    this is the main function for calling scraper and generating report
+    if use_cache, scraper will skip the scraping process and create report directly by using
+    existing csv files under scraped_results folder, otherwise, scraper start from scratch.
+    if use_gsheet, scraper will read given urls from pre-defined gsheet, otherwise, scraper will
+    read urls from settings.py.
 
-    Args:
-        cache (bool, optional): _description_. Defaults to True.
+    return: Create a report findingnemo__report.csv under scraped_results folder.
     """
     if not use_cache:
         process = CrawlerProcess(settings)
@@ -351,7 +330,8 @@ def main(
         process.start()
         logging.info("--- %s seconds ---", (time.time() - start_time))
 
-    _create_report_dataset()
+    report = CreateReportDataSet()
+    report.join_all_scraped_items()
 
 
 if __name__ == "__main__":

@@ -81,7 +81,7 @@ ITEM_PIPELINES = {
 # AUTOTHROTTLE_DEBUG = False
 
 # Enable and configure HTTP caching (disabled by default)
-# See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings # pylint: disable=line-too-long
+# See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings pylint: disable=line-too-long
 # HTTPCACHE_ENABLED = True
 # HTTPCACHE_EXPIRATION_SECS = 0
 # HTTPCACHE_DIR = 'httpcache'
@@ -93,16 +93,21 @@ ITEM_PIPELINES = {
 
 # start urls input
 START_URLS = [
-    "https://www.szabo-scandic.com/",
-    "https://b2b.vitrasan.com/",
-    "https://www.hilti.at/",
-    "https://shop.bibus.at/customer/account/create/",
-    "https://b2b.accushop.at/",
-    "https://b2b.akku-maeser.at/",
+    "https://www.microsoft.com/de-at",
+    "https://www.giesswein.com/",
+    "https://www.heimwerkertools.com/b2b",
+    "https://www.atombody.at/",
+    "https://www.eposcomputer.com/epos-business-center/",
+    "https://gesa.at/en/",
+    "https://www.flyeralarm.com/de/",
+    "https://www.muenzeoesterreich.at/",
+    "https://www.fischersports.com/at_en",
+    "https://shop.mcshark.at/zubehoer",
+    "https://jysk.at/",
 ]
 
 # column name of urls given from gsheet
-INPUT_URL_COLUMN_NAME = "company_url"
+INPUT_URL_COLUMN_NAME = "company_url_cleaned"
 
 # file folder for scraped results
 FILE_FOLDER = Path.cwd().parent / "scraped_results"
@@ -143,6 +148,7 @@ B2B_KEYWORDS = [
     "grohändler",
     "großhandel",
     "geschäftskunden",
+    "gewerbliche kunden",
     "wholesale",
     "b2b",
     "b-to-b",
@@ -183,3 +189,10 @@ CURRENCY_SIGN = "$|EUR|€|GBP|£"
 PRICE_PATTERN = (
     r"\d*[\.\,]?\d+(?=\s?[$|EUR|€|GBP|£])|(?<=[$|EUR|€|GBP|£])\s?\d*[\.\,]?\d+"
 )
+
+# searching phone pattern
+# TODO write tests for it
+PHONE_PATTERN = r"(?:\B\+ ?43|\+49)(?: *[(-]? *\d(?:[ \d]*\d)?)? *(?:[)-] *)?\d+ *(?:[/)-] *)?\d+ *(?:[/)-] *)?\d+(?: *- *\d+)?"  # pylint: disable=line-too-long
+
+# searching email pattern
+EMAIL_PATTERN = r"[\w.+-]+@[\w-]+\.[\w.-]+"

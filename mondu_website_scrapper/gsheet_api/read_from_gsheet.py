@@ -16,7 +16,7 @@ def read_from_gsheet(
     input_columns: list,
     spreadsheet_name: str = None,
     worksheet_name: str = "Marketing-Input-Data",
-):
+) -> pd.DataFrame:
     """
     read value from the given gsheet
 

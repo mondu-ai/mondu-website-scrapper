@@ -20,7 +20,7 @@ def export_report(
     export_data_folder: Union[Path, str],
     spreadsheet_name: str = None,
     worksheet_name: str = "Web-Scraper-Report",
-):
+) -> None:
     """
     export csv file into a pre-defined google sheet
     1. create gsheet api client
